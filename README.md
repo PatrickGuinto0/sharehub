@@ -29,6 +29,8 @@ Authentication: Flask-Login, Werkzeug Security (password hashing)
 Forms & Validation:  Flask-WTF, CSRF protection
 Frontend: HTML5, Jinja2 Templates, Bootstrap 5
 File Storage: Local `uploads/` folder for item images
+
+AI Tool Used: OpenCode - AI coding agent
  
 Demo Login
 Username: alice
@@ -36,10 +38,19 @@ Password: sharehub123
 Username: bob
 Password: sharehub123
  
-How to Run
-1. Create virtual environment: python -m venv venv
-2. Activate: source venv/bin/activate, (Linux/Mac) or venv\Scripts\activate, (Windows)
-3. Install dependencies: pip install -r requirements.txt
-4. Load sample data: python seed.py
-5. Run the app: python app.py
-6. Visit: http://127.0.0.1:5000
+How to run:
+- Python 3.11+ should be installed
+- Check "Add Python.exe to PATH" during installation
+Step 1 - Open the Project Folder
+1. Download and extract the ZIP file to your Desktop
+2. Open Command Prompt
+3. Navigate to the project folder: cd Desktop\sharehub-main
+4. Check what's inside: dir
+5. If you see another folder named  sharehub-main  inside it, go one level deeper: cd sharehub-main
+6. Run  dir  again, you should now see  app.py  and  requirements.txt 
+Step 2 - Create virtual environment: python -m venv venv
+Step 3 - Activate: source venv/bin/activate, (Linux/Mac) or venv\Scripts\activate, (Windows)
+Step 4 - Install dependencies: pip install -r requirements.txt
+Step 5 - Load sample data: python seed.py
+Step 6 - Run the app: python app.py
+Step 7 - Visit: http://127.0.0.1:5000
