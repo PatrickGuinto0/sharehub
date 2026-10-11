@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ legend }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 fw-bold mb-3">
+      <i class="bi bi-pencil-square text-success me-1"></i>{{ legend }}
+    </h1>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.title.label(class="form-label fw-semibold") }}
+            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""),
+                          placeholder="e.g. Wooden bookshelf") }}
+            {% for error in form.title.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.description.label(class="form-label fw-semibold") }}
+            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""),
+                                rows="4",
+                                placeholder="Describe your item, any flaws, and pickup details…") }}
+            {% for error in form.description.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              {{ form.category.label(class="form-label fw-semibold") }}
+              {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+              {% for error in form.category.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-4">
+              {{ form.condition.label(class="form-label fw-semibold") }}
+              {{ form.condition(class="form-select" + (" is-invalid" if form.condition.errors else "")) }}
+              {% for error in form.condition.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-4">
+              {{ form.item_type.label(class="form-label fw-semibold") }}
+              {{ form.item_type(class="form-select" + (" is-invalid" if form.item_type.errors else "")) }}
+              {% for error in form.item_type.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            {{ form.photo.label(class="form-label fw-semibold") }}
+            {% if item and item.photo_url %}
+              <div class="mb-2">
+                <img src="{{ url_for('uploads', filename=item.photo_url) }}"
+                     alt="Current photo" class="rounded border" style="max-height: 120px;">
+                <div class="form-text">Upload a new photo to replace the current one.</div>
+              </div>
+            {% endif %}
+            {{ form.photo(class="form-control" + (" is-invalid" if form.photo.errors else "")) }}
+            {% for error in form.photo.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+            <div class="form-text">JPG, PNG, WEBP or GIF · max 5 MB</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            {{ form.submit(class="btn btn-success btn-lg") }}
+            <a href="{{ url_for('items.detail', item_id=item.id) if item else url_for('main.index') }}"
+               class="btn btn-outline-secondary btn-lg">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="h3 fw-bold mb-1">
+  <i class="bi bi-person-badge text-success me-1"></i>Your dashboard
+</h1>
+<p class="text-muted mb-4">Manage your listings and requests in one place.</p>
+
+<div class="row g-4">
+  {# ---- My listings ---- #}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-box-seam text-success me-1"></i>My listings
+          <span class="badge text-bg-light border">{{ my_items|length }}</span>
+        </h5>
+        {% if my_items %}
+          <div class="list-group list-group-flush">
+            {% for item in my_items %}
+              <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <a href="{{ url_for('items.detail', item_id=item.id) }}" class="fw-semibold text-decoration-none">
+                      {{ item.title }}
+                    </a>
+                    <div class="small text-muted">
+                      {{ category_labels[item.category] }} ·
+                      {{ item_type_labels[item.item_type] }}
+                    </div>
+                  </div>
+                  <span class="badge flex-shrink-0 {{ 'text-bg-success' if item.status == 'available' else 'text-bg-secondary' }}">
+                    {{ item.status }}
+                  </span>
+                </div>
+                <div class="mt-2 d-flex gap-2">
+                  <a href="{{ url_for('items.edit', item_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </a>
+                  <form method="post" action="{{ url_for('items.delete', item_id=item.id) }}"
+                        onsubmit="return confirm('Delete this listing?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash me-1"></i>Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-2">You haven't posted anything yet.</p>
+          <a href="{{ url_for('items.new') }}" class="btn btn-sm btn-success">
+            <i class="bi bi-plus-circle me-1"></i>Post your first item
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ---- Incoming requests ---- #}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-inbox text-success me-1"></i>Incoming requests
+          <span class="badge text-bg-light border">{{ incoming|selectattr('status', 'equalto', 'pending')|list|length }} pending</span>
+        </h5>
+        {% if incoming %}
+          <div class="list-group list-group-flush">
+            {% for req in incoming %}
+              <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <a href="{{ url_for('items.detail', item_id=req.item.id) }}" class="fw-semibold text-decoration-none">
+                      {{ req.item.title }}
+                    </a>
+                    <div class="small text-muted">
+                      from <strong>{{ req.requester.username }}</strong>
+                      · {{ req.created_at.strftime('%b %d') if req.created_at else '' }}
+                    </div>
+                  </div>
+                  <span class="badge flex-shrink-0 {{ {'pending': 'text-bg-warning', 'accepted': 'text-bg-success', 'declined': 'text-bg-secondary'}.get(req.status, 'text-bg-light') }}">
+                    {{ req.status }}
+                  </span>
+                </div>
+                {% if req.message %}
+                  <p class="small fst-italic text-muted mb-2 mt-1">“{{ req.message }}”</p>
+                {% endif %}
+                {% if req.status == 'pending' %}
+                  <div class="d-flex gap-2">
+                    <form method="post" action="{{ url_for('requests.accept', request_id=req.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-sm btn-success">
+                        <i class="bi bi-check-lg me-1"></i>Accept
+                      </button>
+                    </form>
+                    <form method="post" action="{{ url_for('requests.decline', request_id=req.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i>Decline
+                      </button>
+                    </form>
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">No requests yet. When someone wants your item, it shows up here.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ---- Outgoing requests ---- #}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-send text-success me-1"></i>My requests
+          <span class="badge text-bg-light border">{{ outgoing|length }}</span>
+        </h5>
+        {% if outgoing %}
+          <div class="list-group list-group-flush">
+            {% for req in outgoing %}
+              <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <a href="{{ url_for('items.detail', item_id=req.item.id) }}" class="fw-semibold text-decoration-none">
+                      {{ req.item.title }}
+                    </a>
+                    <div class="small text-muted">
+                      owner: <strong>{{ req.item.owner.username }}</strong>
+                      · {{ req.created_at.strftime('%b %d') if req.created_at else '' }}
+                    </div>
+                  </div>
+                  <span class="badge flex-shrink-0 {{ {'pending': 'text-bg-warning', 'accepted': 'text-bg-success', 'declined': 'text-bg-secondary'}.get(req.status, 'text-bg-light') }}">
+                    {{ req.status }}
+                  </span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-2">You haven't requested any items yet.</p>
+          <a href="{{ url_for('main.index') }}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-grid me-1"></i>Browse items
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

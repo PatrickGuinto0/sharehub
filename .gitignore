@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+.secret_key
+
+# App data
+sharehub.db
+uploads/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

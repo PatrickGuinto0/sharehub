@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Browse</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ item.title }}</li>
+  </ol>
+</nav>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    {% if item.photo_url %}
+      <img src="{{ url_for('uploads', filename=item.photo_url) }}"
+           alt="{{ item.title }}" class="img-fluid rounded-3 shadow-sm w-100 detail-photo">
+    {% else %}
+      <div class="detail-photo-placeholder rounded-3 d-flex align-items-center justify-content-center">
+        <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-6">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+      <h1 class="h2 fw-bold mb-0">{{ item.title }}</h1>
+      <span class="badge fs-6 {{ 'text-bg-success' if item.item_type == 'donation' else 'text-bg-primary' }}">
+        {{ item_type_labels[item.item_type] }}
+      </span>
+    </div>
+
+    <p class="text-muted mt-2 mb-3">
+      <span class="badge text-bg-light border me-1">{{ category_labels[item.category] }}</span>
+      <span class="badge text-bg-light border">{{ condition_labels[item.condition] }}</span>
+    </p>
+
+    <p class="lead">{{ item.description }}</p>
+
+    <hr>
+
+    <p class="text-muted small mb-3">
+      <i class="bi bi-person-circle me-1"></i>Posted by <strong>{{ item.owner.username }}</strong>
+      · {{ item.created_at.strftime('%B %d, %Y') if item.created_at else 'recently' }}
+    </p>
+
+    {% if item.status != 'available' %}
+      <span class="badge text-bg-secondary fs-6 mb-3">
+        <i class="bi bi-lock me-1"></i>This item has been reserved
+      </span>
+    {% elif not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-success btn-lg">
+        <i class="bi bi-box-arrow-in-right me-1"></i>Log in to request this item
+      </a>
+    {% elif current_user.id == item.owner_id %}
+      <span class="badge text-bg-light border fs-6">
+        <i class="bi bi-person-badge me-1"></i>This is your listing
+      </span>
+    {% else %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold mb-2">
+            <i class="bi bi-envelope text-success me-1"></i>Request this item
+          </h5>
+          <form method="post" action="{{ url_for('requests.new', item_id=item.id) }}">
+            {{ request_form.hidden_tag() }}
+            <div class="mb-3">
+              {{ request_form.message.label(class="form-label fw-semibold") }}
+              {{ request_form.message(class="form-control") }}
+            </div>
+            {{ request_form.submit(class="btn btn-success") }}
+          </form>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if current_user.is_authenticated and current_user.id == item.owner_id %}
+      <hr>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('items.edit', item_id=item.id) }}" class="btn btn-outline-primary">
+          <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <form method="post" action="{{ url_for('items.delete', item_id=item.id) }}"
+              onsubmit="return confirm('Delete this listing? This cannot be undone.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
